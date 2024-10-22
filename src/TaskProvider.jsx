@@ -1,4 +1,4 @@
-import { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useState, useContext, useEffect, useCallback } from "react";
 import { getApi } from "./api";
 
 const TaskContext = createContext();
@@ -9,24 +9,38 @@ export const useData = () => {
 export const TaskProvider = ({ children }) => {
   const [data, setData] = useState([]);
 
+  const setStatus = useCallback((id, newStatus) => {
+    setData((prev) => {
+      return prev.map((t) =>{
+        if(t.id == id){
+          return{
+            ...t,
+            taskStatus: newStatus
+          }
+        }
+        return t
+      })
+    })
+  },[])
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const apiData = await getApi(); // Fetch the data
-        console.log("Fetched Data:", apiData); // Log the fetched data for debugging
-        setData(apiData); // Set the fetched data to state
+        const apiData = await getApi(); 
+        console.log("Fetched Data:", apiData);
+        setData(apiData); 
       } catch (err) {
-        console.log("Error fetching data:", err); // Log any error that occurs
+        console.log("Error fetching data:", err); 
       }
     };
   
-    fetchData(); // Call the async function to fetch data
-  }, []); // This will run once when the component mounts
-    
+    fetchData(); 
+  }, []); 
+
 
   return (
     <div>
-      <TaskContext.Provider value={{data}}>{children}</TaskContext.Provider>
+      <TaskContext.Provider value={{data , setStatus}}>{children}</TaskContext.Provider>
     </div>
   );
 };
